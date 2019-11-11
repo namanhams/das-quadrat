@@ -56,7 +56,7 @@ class DataCache {
         let cacheURL: URL?
         do {
             cacheURL = try fileManager.url(for: .cachesDirectory, in: .userDomainMask,
-                        appropriateFor: nil, create: true)
+                                           appropriateFor: nil, create: true)
         } catch _ {
             fatalError("Can't get access to cache directory")
         }
@@ -119,22 +119,22 @@ class DataCache {
     /** Subcribes for iOS specific notifications to perform cache cleaning. */
     fileprivate func subscribeForNotifications() {
         #if os(iOS)
-            
-            let center = NotificationCenter.default
-            let didEnterBackground = NSNotification.Name.UIApplicationDidEnterBackground
-            let firstObserver = center.addObserver(forName: didEnterBackground, object: nil, queue: nil) {
-                [weak self] (notification) -> Void in
-                self?.cleanupCache()
-                self?.cache.removeAllObjects()
-            }
-            self.observers.append(firstObserver)
-            
-            let didReceiveMemoryWaring = NSNotification.Name.UIApplicationDidReceiveMemoryWarning
-            let secondObserver = center.addObserver(forName: didReceiveMemoryWaring, object: nil, queue: nil) {
-                [weak self] (notification) -> Void in
-                self?.cache.removeAllObjects()
-            }
-            self.observers.append(secondObserver)
+        
+        let center = NotificationCenter.default
+        let didEnterBackground = UIApplication.didEnterBackgroundNotification
+        let firstObserver = center.addObserver(forName: didEnterBackground, object: nil, queue: nil) {
+            [weak self] (notification) -> Void in
+            self?.cleanupCache()
+            self?.cache.removeAllObjects()
+        }
+        self.observers.append(firstObserver)
+        
+        let didReceiveMemoryWaring = UIApplication.didReceiveMemoryWarningNotification
+        let secondObserver = center.addObserver(forName: didReceiveMemoryWaring, object: nil, queue: nil) {
+            [weak self] (notification) -> Void in
+            self?.cache.removeAllObjects()
+        }
+        self.observers.append(secondObserver)
         #endif
     }
     
@@ -142,7 +142,7 @@ class DataCache {
     fileprivate func createBaseDirectory() {
         do {
             try fileManager.createDirectory(at: directoryURL,
-                        withIntermediateDirectories: true, attributes: nil)
+                                            withIntermediateDirectories: true, attributes: nil)
         } catch let error as NSError {
             self.logger?.logError(error, withMessage: "Cache can't create base directory.")
         }
@@ -208,7 +208,7 @@ class DataCache {
         let properties = [URLResourceKey.contentModificationDateKey, URLResourceKey.totalFileAllocatedSizeKey]
         do {
             return try self.fileManager.contentsOfDirectory(at: self.directoryURL,
-                includingPropertiesForKeys: properties, options: .skipsHiddenFiles)
+                                                            includingPropertiesForKeys: properties, options: .skipsHiddenFiles)
         } catch let error as NSError {
             self.logger?.logError(error, withMessage: "Cache can't get properties of files in base directory.")
             return [URL]()
